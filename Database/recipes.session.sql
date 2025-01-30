@@ -55,3 +55,10 @@ SELECT * FROM UserIngredients;
 SELECT * FROM RecipeIngredients;
 
 
+-- @block
+SELECT Ingredients.id AS ingredient_id, 
+       Ingredients.name AS ingredient_name, 
+       UserIngredients.created_at
+FROM UserIngredients
+JOIN Ingredients ON UserIngredients.ingredient_id = Ingredients.id
+WHERE UserIngredients.user_id = 3;

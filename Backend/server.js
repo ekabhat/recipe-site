@@ -20,10 +20,44 @@ app.get('/recipes', (req, res) => {
 });
 
 app.get('/users/:id/ingredients', (req, res) => {
-    db.query('SELECT * FROM users WHERE', req.body, (err, result) => {
-
+    const sql = `SELECT User.id, User.email, User.createdAt, Ingredients.id, Ingredients.name, Ingredients.createdAt 
+    FROM User
+    LEFT JOIN UserIngredients ON User.id = UserIngredients.user_id
+    LEFT JOIN Users ON UserIngredients.user_id = Users.id
+    WHERE UserIngredients.user_id = ? `
+    
+    db.query(sql , [req.params.id], (err, result) => {
+        if (err) {
+            console.error('Error fetching recipe:', err);
+            res.status(500).send('Database query failed');
+        } else {
+            res.json(result);
+        }
     });
 });
+
+
+
+app.get('/recipes/:id', (req, res) => {
+    const sql = `SELECT Recipes.id, Recipes.title, Recipes.instructions, Recipes.createdAt, Ingredients.id, Ingredients.name, Ingredients.createdAt
+    FROM Recipes
+    LEFT JOIN RecipeIngredients ON RecipeIngredients.recipe_id = Recipes.id
+    LEFT JOIN Ingredients ON RecipeIngredients.ingredient_id = Ingredients.id
+    WHERE RecipeIngredients.recipe_id = ?`
+
+    db.query('SELECT * FROM recipes WHERE id = ?', [req.params.id], (err, result) => {
+        if (err) {
+            console.error('Error fetching recipe:', err);
+            res.status(500).send('Database query failed');
+        } else {
+            res.json(result);
+        }
+    });
+
+});
+
+
+
 
 app.listen(5000, ()=> {
     console.log('server is running port 5000')
