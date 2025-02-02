@@ -54,7 +54,7 @@ app.get('/users/:id', (req, res) => {
 
 
 app.get('/recipes/:id', (req, res) => {
-    const sql = `SELECT Recipes.id AS Recipe_id, Recipes.name AS Recipe_name, Recipes.instructions, Recipes.created_at AS Recipe_createdAt, Recipes.image_url,
+    const sql = `SELECT Recipes.id AS Recipe_id, Recipes.name AS Recipe_name, Recipes.instructions, Recipes.description, Recipes.created_at AS Recipe_createdAt, Recipes.image_url,
     Ingredients.id AS Ingredient_id, Ingredients.name AS Ingredient_name, Ingredients.created_at AS Ingredient_createdAt,
     RecipeIngredients.quantity, RecipeIngredients.unit
     FROM Recipes
@@ -76,6 +76,7 @@ app.get('/recipes/:id', (req, res) => {
             recipe.recipe_name = result[0].Recipe_name;
             recipe.recipe_createdAt = result[0].Recipe_createdAt;
             recipe.recipe_instructions = result[0].instructions;
+            recipe.recipe_description = result[0].description;
             recipe.recipe_image = result[0].image_url;
             recipe.ingredientArray = [];
 
@@ -100,11 +101,39 @@ app.get('/recipes/:id', (req, res) => {
 
 
 app.post('/recipes', (req, res) => {
+    //getting data from client (req.body)
+    const recipe_name = req.body.name;
+    const instructions = req.body.instructions;
+    const description = req.body.description;
+    const image_url = req.body.image_url;
+
+    //check if fields are NULL
+    if (!name || !description || !instructions) {
+        return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    req.body.forEach(ingredient => {
+        if (!ingredient.name || !ingredient.quantity || !ingredient.unit) {
+            return res.status(400).json({ error: "Missing required ingredient fields" });
+        }
+        const ingredient_name = ingredient.name;
+        const quantity = ingredient.quantity;
+        const unit = ingredient.unit;
+    });
 
 
-
-
+    //TODO: learn adding to database
+        //adding to Recipes
+        //adding to Ingredients
+        //adding to RecipeIngredients
     
+
+
+
+
+
+
+
 });
 
 
