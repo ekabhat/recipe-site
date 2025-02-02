@@ -108,7 +108,7 @@ app.post('/recipes', (req, res) => {
     const image_url = req.body.image_url;
 
     //check if fields are NULL
-    if (!name || !description || !instructions) {
+    if (!recipe_name || !description || !instructions || !image_url) {
         return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -121,6 +121,27 @@ app.post('/recipes', (req, res) => {
         const unit = ingredient.unit;
     });
 
+    //inserting recipe into Recipes table
+    const sql = `INSERT INTO Recipes (name, instructions, description, image_url) VALUES (?, ?, ?, ?)`;
+    db.query(sql, [recipe_name, instructions, description, image_url], (err, result) => {
+        if (err) {
+            console.error('Error inserting recipe:', err);
+            res.status(500).send('Database query failed');
+            return;
+        }
+        recipe_id = result.insertId;  // id of the new inserted recipe row
+        console.log("Recipe Inserted Successfully, Recipe id = " + result.insertId);
+        
+        //TODO:
+        //to return recipe_id for ingredient table, we need to call back
+        //check how to async await callback
+
+
+    });
+
+
+
+    
 
     //TODO: learn adding to database
         //adding to Recipes
