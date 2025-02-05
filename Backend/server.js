@@ -98,7 +98,7 @@ app.get('/recipes/:id', async (req, res) => {
 });
 
 
-app.post('/recipes', (req, res) => {
+app.post('/recipes', async (req, res) => {
     //getting data from client (req.body)
     const recipe_name = req.body.name;
     const instructions = req.body.instructions;
@@ -121,15 +121,20 @@ app.post('/recipes', (req, res) => {
 
     //inserting recipe into Recipes table
     const sql = `INSERT INTO Recipes (name, instructions, description, image_url) VALUES (?, ?, ?, ?)`;
-    db.query(sql, [recipe_name, instructions, description, image_url], (err, result) => {
-        if (err) {
-            console.error('Error inserting recipe:', err);
-            res.status(500).send('Database query failed');
-            return;
-        }
+
+    try{
+        const [result] = await pool.query(sql, [recipe_name, instructions, description, image_url])
         recipe_id = result.insertId;  // id of the new inserted recipe row
         console.log("Recipe Inserted Successfully, Recipe id = " + result.insertId);
-        
+        res.status(201).json({ message: "Recipe added successfully", recipe_id });
+
+    }catch (err){
+        console.error('Error inserting recipe:', err);
+        res.status(500).send('Database query failed');
+    }
+
+
+    
 
         //TODO:
         //to return recipe_id for ingredient table, we need to call back
@@ -154,7 +159,6 @@ app.post('/recipes', (req, res) => {
 
 
 
-});
 
 
 
