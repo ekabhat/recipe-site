@@ -99,6 +99,9 @@ app.get('/recipes/:id', async (req, res) => {
 
 
 app.post('/recipes', async (req, res) => {
+
+    ////PARSING REQ.BODY
+
     //getting data from client (req.body)
     const recipe_name = req.body.name;
     const instructions = req.body.instructions;
@@ -118,6 +121,8 @@ app.post('/recipes', async (req, res) => {
         const quantity = ingredient.quantity;
         const unit = ingredient.unit;
     });
+
+    /////////END PARSING REQ.BODY
 
     //inserting recipe into Recipes table
     const sql = `INSERT INTO Recipes (name, instructions, description, image_url) VALUES (?, ?, ?, ?)`;
