@@ -1,5 +1,5 @@
 import express from 'express';
-import db from '../Database/database.js';
+import pool from '../Database/database.js';
 
 const app = express();
 app.use(express.json());
@@ -132,6 +132,7 @@ app.post('/recipes', (req, res) => {
         recipe_id = result.insertId;  // id of the new inserted recipe row
         console.log("Recipe Inserted Successfully, Recipe id = " + result.insertId);
         
+
         //TODO:
         //to return recipe_id for ingredient table, we need to call back
         //check how to async await callback

@@ -1,17 +1,18 @@
 import mysql from 'mysql2';
-const db = mysql.createConnection({
+const pool = mysql.createPool({
     host: 'localhost',
     user: 'root',
     password: 'inaminam',
     database: 'recipe_db'
 });
 
-db.connect((err) => {
+pool.getConnection((err, connection) => {
     if(err){
         console.error('error connecting:', err);
         process.exit(1);
     }
     console.log('connected to database!!!');
+    connection.release();
 });
 
-export default db;
+export default pool;
