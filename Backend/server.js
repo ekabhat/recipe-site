@@ -22,15 +22,28 @@ app.get('/recipes', async (req, res) => {
 
 
 app.get('/users/:id', async (req, res) => {
-    const sql = `SELECT Users.id AS user_id, Users.email, Users.created_at AS User_createdAt, 
-    Ingredients.id AS Ingredient_id, Ingredients.name, Ingredients.created_at AS Ingredient_createdAt 
+    const sql = `SELECT 
+    Users.id AS user_id, 
+    Users.email, 
+    Users.created_at AS User_createdAt, 
+    Ingredients.id AS Ingredient_id, 
+    Ingredients.name, 
+    Ingredients.created_at AS Ingredient_createdAt 
+
     FROM Users
     LEFT JOIN UserIngredients ON Users.id = UserIngredients.user_id
     LEFT JOIN Ingredients ON UserIngredients.Ingredient_id = Ingredients.id
-    WHERE UserIngredients.User_id = ? `
+
+    WHERE Users.id = ?`
+
 
     try{   
         const [result] = await pool.query(sql, [req.params.id]);
+        console.log(result)
+        if (result.length === 0){
+            return res.status(404).json({ error: "User not found" });   //user doesnt exist
+        }
+        
         const user = {};
             user.email = result[0].email;
             user.recipe_createdAt = result[0].user_createdAt;
@@ -41,6 +54,9 @@ app.get('/users/:id', async (req, res) => {
                 user.ingredients.push(row.name);
                 user.ingredients_id.push(row.Ingredient_id);
             });
+
+            
+
 
             res.json(user);
 
@@ -59,7 +75,7 @@ app.get('/recipes/:id', async (req, res) => {
     FROM Recipes
     LEFT JOIN RecipeIngredients ON RecipeIngredients.Recipe_id = Recipes.id
     LEFT JOIN Ingredients ON RecipeIngredients.Ingredient_id = Ingredients.id
-    WHERE RecipeIngredients.Recipe_id = ?`
+    WHERE Recipes.id = ?`
 
     try{
         const [result] = await pool.query(sql, [req.params.id])
@@ -98,6 +114,26 @@ app.get('/recipes/:id', async (req, res) => {
 });
 
 
+app.post('/', async (req,res) => {
+
+    let user_id;
+    
+    try{
+        const email = req.body.email
+
+        const usersql = `INSERT INTO Users (email) VALUES (?)`
+        const result = await pool.query(usersql, [email])
+    
+        user_id = result.insertId
+
+        res.status(201).json({ message: "User Added Successfully", user_id});
+    }
+    catch(err){
+        res.status(500).send('failed adding user')
+    }
+    
+
+});
 
 
 //UPLOADING RECIPES!!
@@ -290,20 +326,17 @@ app.post('/users/:id', async (req,res) => {
 
     }
 
+
+    /* EXAMPLE GROCERIES FORMAT
+    {
+        "ingredients": [
+          { "name": "Flour" },
+          { "name": "Sugar" },
+          { "name": "Eggs" }
+        ]
+      } */
+
 });
-
-
-    
-
-    //TODO: learn adding to database
-        //adding to Recipes
-        //adding to Ingredients
-        //adding to RecipeIngredients
-    
-
-
-
-
 
 
 
@@ -319,3 +352,10 @@ app.use((req, res) => {
 app.listen(5000, ()=> {
     console.log('server is running port 5000')
 })
+
+
+
+
+
+
+//RIGHT NOW USERS WITH NO GROCERIES COME WITH DATABASE QUERY FAIL
