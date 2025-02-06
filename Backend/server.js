@@ -122,7 +122,7 @@ app.post('/recipes', async (req, res) => {
 
     /////////END PARSING REQ.BODY
 
-    let recipe_id  //making recipe_id global
+    let recipe_id;  //making recipe_id global
 
     //INSERT RECIPE
     try{
@@ -166,34 +166,35 @@ app.post('/recipes', async (req, res) => {
     //INSERT RECIPE INGREDIENTS CONNECTION TABLE
     try{
 
-        //getting recipe ids
-        const recipeIdSql = `SELECT Ingredients.id FROM Ingredients WHERE Ingredients.name = ?`
 
-        const recipeIdQueries = req.body.ingredients.map(ingredients => {
-            return pool.query(recipeIdSql, [ingredients.name])
+        //getting recipe ids
+        const ingredientIdSql = `SELECT Ingredients.id FROM Ingredients WHERE Ingredients.name = ?` //query ingredient ids for each ingredient in recipe
+
+        const ingredientIdQueries = req.body.ingredients.map(ingredientid => {          //query for every ingredient
+            return pool.query(ingredientIdSql, [ingredientid.name])
         });
 
-        const result = await Promise.all(recipeIdQueries)
-        result.forEach()
+        const result = await Promise.all(ingredientIdQueries)
+        const ingredientid = result.map(object => object[0][0].id)   //ingredientid = array of ingredient ids
+
+        console.log(ingredientid)
+
+        
 
 
+        const sql = `INSERT INTO RecipeIngredients (Recipe_id, Ingredient_id, quantity, unit) VALUES (?, ?, ?, ?)`;
 
-        res.status(201).json({ message: "Ingredient id successful", result });
-
-        console.log(result)
-
-
-
-        /* const sql = `INSERT INTO RecipeIngredients (Recipe_id, Ingredient_id, quantity, unit) VALUES (?, ?, ?, ?)`;
-
-        const recipeIngredientQueries = req.body.ingredients.map(ingredient => {
-            return pool.query(sql, [recipe_id, ingredient.id, ingredient.quantity, ingredient.unit]);
+        const recipeIngredientQueries = req.body.ingredients.map((ingredient, index) => {
+            console.log(recipe_id)
+            const ingredient_id = ingredientid[index]
+            return pool.query(sql, [recipe_id, ingredient_id, ingredient.quantity, ingredient.unit]);
         });
 
         await Promise.all(recipeIngredientQueries)
 
+        
         console.log("linked recipes to ingredients")
-         */
+        
 
 
     }catch(err){
