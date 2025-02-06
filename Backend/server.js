@@ -129,7 +129,7 @@ app.post('/recipes', async (req, res) => {
         const sql = `INSERT INTO Recipes (name, instructions, description, image_url) VALUES (?, ?, ?, ?)`;
         const [result] = await pool.query(sql, [recipe_name, instructions, description, image_url])
 
-        const recipe_id = result.insertId;  // id of the new inserted recipe row
+        recipe_id = result.insertId;  // id of the new inserted recipe row
 
         console.log("Recipe Inserted Successfully, Recipe id = " + result.insertId);
         res.status(201).json({ message: "Recipe added successfully", recipe_id });
