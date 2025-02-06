@@ -236,7 +236,6 @@ app.post('/users/:id', async (req,res) => {
         const ingredientSql = `INSERT IGNORE INTO Ingredients (name) VALUES (?)`;
 
         const ingredientQueries = req.body.ingredients.map(ingredient => {  //for each ingredient in the array
-            console.log(ingredient.name)
             return pool.query(ingredientSql, [ingredient.name]);          //ingredientQueries returns sql queries with each ingredient
         });
 
@@ -270,25 +269,26 @@ app.post('/users/:id', async (req,res) => {
 
 
 
-        const userIngredientSql = `INSERT INTO UserIngredients (user_id, ingredientid) VALUES(?, ?)`
+        //INSERTING INTO USERINGREDIENT TABLE
+        const userIngredientSql = `INSERT INTO UserIngredients (user_id, ingredient_id) VALUES (?, ?)`
 
-        const userIngredientQuery = req.body.ingredients.map(index => {
-            return pool.query(userIngredientQuery, (user_id, ingredientid[index])
-        )
+        const userIngredientQuery = ingredientid.map(ingredientId => {
+            return pool.query(userIngredientSql, [user_id, ingredientId])
+        });
 
         await Promise.all(userIngredientQuery)
 
 
-        }
+        res.status(201).json({ message: "Ingredients added and Updated UserIngredient Tables"});
+
+
+
+
     }
     catch(err){
-        throw new Error("Error: Insert Ingredients TABKE " + err.message);
+        throw new Error("Error: Updaing UserIgredient Table Failed - " + err.message);
 
     }
-
-
-
-
 
 });
 

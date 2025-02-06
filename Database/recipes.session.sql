@@ -57,6 +57,10 @@ SELECT * FROM UserIngredients;
 SELECT * FROM RecipeIngredients;
 
 
+
+--@block
+DROP TABLE IF EXISTS UserIngredients;
+
 -- @block
 DROP TABLE IF EXISTS RecipeIngredients;
 DROP TABLE IF EXISTS Recipes;
