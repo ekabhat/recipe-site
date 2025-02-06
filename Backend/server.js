@@ -113,63 +113,92 @@ app.post('/recipes', async (req, res) => {
         return res.status(400).json({ error: "Missing required fields" });
     }
 
-    req.body.forEach(ingredient => {
+    req.body.ingredients.forEach(ingredient => {     //Only checking if ingredient is valid, no parsing
         if (!ingredient.name || !ingredient.quantity || !ingredient.unit) {
             return res.status(400).json({ error: "Missing required ingredient fields" });
         }
-        const ingredient_name = ingredient.name;
-        const quantity = ingredient.quantity;
-        const unit = ingredient.unit;
+ 
     });
 
     /////////END PARSING REQ.BODY
 
-    //inserting recipe into Recipes table
+    let recipe_id  //making recipe_id global
+
+    //INSERT RECIPE
     try{
-        //INSERT RECIPE
-        try{
-            const sql = `INSERT INTO Recipes (name, instructions, description, image_url) VALUES (?, ?, ?, ?)`;
-            const [result] = await pool.query(sql, [recipe_name, instructions, description, image_url])
-            recipe_id = result.insertId;  // id of the new inserted recipe row
-            console.log("Recipe Inserted Successfully, Recipe id = " + result.insertId);
-            res.status(201).json({ message: "Recipe added successfully", recipe_id });
-        }catch (err){
-            throw new Error("Error: Insert Recipe " + error.message);
-        }
+        const sql = `INSERT INTO Recipes (name, instructions, description, image_url) VALUES (?, ?, ?, ?)`;
+        const [result] = await pool.query(sql, [recipe_name, instructions, description, image_url])
 
-        //INSERT INGREDIENTS
-        try{
-            const sql = `INSERT IGNORE INTO Ingredients (name) VALUES (?)`;
-            const ingredientQueries = req.body.map(ingredient => {  //for each ingredient in the array
-                return pool.query(sql, [ingredient.name]);          //ingredientQueries returns sql queries with each ingredient
-            });
-            await Promise.all(ingredientQueries);                   //run all queries
-            console.log("Ingredients Inserted Successfully");
+        const recipe_id = result.insertId;  // id of the new inserted recipe row
 
-        }catch(err){
-            throw new Error("Error: Insert Ingredients " + error.message);
-        }
+        console.log("Recipe Inserted Successfully, Recipe id = " + result.insertId);
+        res.status(201).json({ message: "Recipe added successfully", recipe_id });
 
-        //INSERT RECIPE INGREDIENTS CONNECTION TABLE
-        try{
-            const sql = `INSERT INTO RecipeIngredients (Recipe_id, Ingredient_id, quantity, unit) VALUES (?, ?, ?, ?)`;
-
-
-        }catch(err){
-
-
-        }
-
-
-        
 
     }catch (err){
-        console.error(err.message); // Logs exactly which step failed
-        res.status(500).json({ error: err.message });
+        throw new Error("Error: Insert Recipe " + err.message);
+    }
+
+
+
+    //INSERT INGREDIENTS
+    try{
+        const sql = `INSERT IGNORE INTO Ingredients (name) VALUES (?)`;
+
+        const ingredientQueries = req.body.ingredients.map(ingredient => {  //for each ingredient in the array
+            return pool.query(sql, [ingredient.name]);          //ingredientQueries returns sql queries with each ingredient
+        });
+
+        await Promise.all(ingredientQueries);                   //run all queries
+
+        console.log("Ingredients Inserted Successfully");
+
+
+
+
+
+    }catch(err){
+        throw new Error("Error: Insert Ingredients " + err.message);
     }
 
 
     
+    //INSERT RECIPE INGREDIENTS CONNECTION TABLE
+    try{
+
+        //getting recipe ids
+        const recipeIdSql = `SELECT ingredient_id FROM Ingredients WHERE Ingredients.name = ?`
+
+        const recipeIdQueries = req.body.ingredients.map(ingredients => {
+            return pool.query(recipeIdSql, [ingredients.name])
+        });
+
+        const [result] = await Promise.all(recipeIdQueries)
+        res.status(201).json({ message: "Ingredient id successful", result });
+
+        console.log(result)
+
+
+
+        const sql = `INSERT INTO RecipeIngredients (Recipe_id, Ingredient_id, quantity, unit) VALUES (?, ?, ?, ?)`;
+
+        const recipeIngredientQueries = req.body.ingredients.map(ingredient => {
+            return pool.query(sql, [recipe_id, ingredient.id, ingredient.quantity, ingredient.unit]);
+        });
+
+        await Promise.all(recipeIngredientQueries)
+
+        console.log("linked recipes to ingredients")
+        
+
+
+    }catch(err){
+        throw new Error("Error: Linking RecipeIngredients Table " + err.message);
+
+
+    }
+
+
 
         //TODO:
         //to return recipe_id for ingredient table, we need to call back
