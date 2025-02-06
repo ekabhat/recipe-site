@@ -167,20 +167,24 @@ app.post('/recipes', async (req, res) => {
     try{
 
         //getting recipe ids
-        const recipeIdSql = `SELECT ingredient_id FROM Ingredients WHERE Ingredients.name = ?`
+        const recipeIdSql = `SELECT Ingredients.id FROM Ingredients WHERE Ingredients.name = ?`
 
         const recipeIdQueries = req.body.ingredients.map(ingredients => {
             return pool.query(recipeIdSql, [ingredients.name])
         });
 
-        const [result] = await Promise.all(recipeIdQueries)
+        const result = await Promise.all(recipeIdQueries)
+        result.forEach()
+
+
+
         res.status(201).json({ message: "Ingredient id successful", result });
 
         console.log(result)
 
 
 
-        const sql = `INSERT INTO RecipeIngredients (Recipe_id, Ingredient_id, quantity, unit) VALUES (?, ?, ?, ?)`;
+        /* const sql = `INSERT INTO RecipeIngredients (Recipe_id, Ingredient_id, quantity, unit) VALUES (?, ?, ?, ?)`;
 
         const recipeIngredientQueries = req.body.ingredients.map(ingredient => {
             return pool.query(sql, [recipe_id, ingredient.id, ingredient.quantity, ingredient.unit]);
@@ -189,7 +193,7 @@ app.post('/recipes', async (req, res) => {
         await Promise.all(recipeIngredientQueries)
 
         console.log("linked recipes to ingredients")
-        
+         */
 
 
     }catch(err){
