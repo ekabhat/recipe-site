@@ -125,17 +125,47 @@ app.post('/recipes', async (req, res) => {
     /////////END PARSING REQ.BODY
 
     //inserting recipe into Recipes table
-    const sql = `INSERT INTO Recipes (name, instructions, description, image_url) VALUES (?, ?, ?, ?)`;
-
     try{
-        const [result] = await pool.query(sql, [recipe_name, instructions, description, image_url])
-        recipe_id = result.insertId;  // id of the new inserted recipe row
-        console.log("Recipe Inserted Successfully, Recipe id = " + result.insertId);
-        res.status(201).json({ message: "Recipe added successfully", recipe_id });
+        //INSERT RECIPE
+        try{
+            const sql = `INSERT INTO Recipes (name, instructions, description, image_url) VALUES (?, ?, ?, ?)`;
+            const [result] = await pool.query(sql, [recipe_name, instructions, description, image_url])
+            recipe_id = result.insertId;  // id of the new inserted recipe row
+            console.log("Recipe Inserted Successfully, Recipe id = " + result.insertId);
+            res.status(201).json({ message: "Recipe added successfully", recipe_id });
+        }catch (err){
+            throw new Error("Error: Insert Recipe " + error.message);
+        }
+
+        //INSERT INGREDIENTS
+        try{
+            const sql = `INSERT IGNORE INTO Ingredients (name) VALUES (?)`;
+            const ingredientQueries = req.body.map(ingredient => {  //for each ingredient in the array
+                return pool.query(sql, [ingredient.name]);          //ingredientQueries returns sql queries with each ingredient
+            });
+            await Promise.all(ingredientQueries);                   //run all queries
+            console.log("Ingredients Inserted Successfully");
+
+        }catch(err){
+            throw new Error("Error: Insert Ingredients " + error.message);
+        }
+
+        //INSERT RECIPE INGREDIENTS CONNECTION TABLE
+        try{
+            const sql = `INSERT INTO RecipeIngredients (Recipe_id, Ingredient_id, quantity, unit) VALUES (?, ?, ?, ?)`;
+
+
+        }catch(err){
+
+
+        }
+
+
+        
 
     }catch (err){
-        console.error('Error inserting recipe:', err);
-        res.status(500).send('Database query failed');
+        console.error(err.message); // Logs exactly which step failed
+        res.status(500).json({ error: err.message });
     }
 
 

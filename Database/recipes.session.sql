@@ -121,3 +121,7 @@ INSERT INTO RecipeIngredients (recipe_id, ingredient_id, quantity, unit) VALUES
 (4, 1, '250', 'grams'), (4, 2, '200', 'grams'), (4, 4, '3', 'pieces'), (4, 5, '50', 'grams'), -- Chocolate Cake
 
 (5, 6, '1', 'pinch'), (5, 7, '1', 'tbsp'), (5, 10, '50', 'grams'); -- Salad
+
+
+-- @block
+ALTER TABLE Ingredients ADD UNIQUE (name);
