@@ -20,7 +20,6 @@ app.get('/recipes', async (req, res) => {
 });
 
 
-
 app.get('/users/:id', async (req, res) => {
     const sql = `SELECT 
     Users.id AS user_id, 
@@ -39,7 +38,6 @@ app.get('/users/:id', async (req, res) => {
 
     try{   
         const [result] = await pool.query(sql, [req.params.id]);
-        console.log(result)
         if (result.length === 0){
             return res.status(404).json({ error: "User not found" });   //user doesnt exist
         }
@@ -114,6 +112,7 @@ app.get('/recipes/:id', async (req, res) => {
 });
 
 
+//UPLOADING EMAIL
 app.post('/', async (req,res) => {
 
     let user_id;
@@ -251,6 +250,7 @@ app.post('/recipes', async (req, res) => {
 });
 
 
+//UPLOADING GROCERIES
 app.post('/users/:id', async (req,res) => {
 
     ///PARSING REQ.BODY
@@ -339,7 +339,75 @@ app.post('/users/:id', async (req,res) => {
 });
 
 
+//DELETING RECIPES
+app.delete('/recipes/:id', async (req,res) =>{
+    const recipe_id = [req.params.id]      //recipe_id = id from url
 
+    //DELETING FROM RECIPE INGREDIENT TABLE
+    try{
+        const sql = `DELETE FROM RecipeIngredients WHERE Recipe_id = ?`
+        const [result] = await pool.query(sql, recipe_id)
+        console.log("Recipe Ingredient table detached successfully")
+
+    }
+    catch(err){
+
+    }
+
+
+    //DELETING FROM RECIPE TABLE
+    try{
+        const deletesql = `DELETE FROM Recipes WHERE id = ?`
+        const [result] = await pool.query(deletesql, recipe_id)  
+        res.json({ message: "Recipe deleted successfully" });
+    }
+    catch(err){
+        console.error('Error deleting recipe:', err);
+        res.status(500).json({ error: "Recipe Deletion Failed" });
+
+    }
+
+});
+
+
+//DELETING GROCERIES
+app.delete('/users/:id', async (req, res) => {
+    const user_id = [req.params.id]
+
+
+    try{
+        const sql = `SELECT id FROM Ingredients WHERE name = ?`
+        const idQuery = req.body.ingredients.map(ingredients =>{
+            return pool.query(sql, [ingredients])
+        })
+    
+        const result = await Promise.all(idQuery)
+    
+        const ingredientid = result.map(object => object[0][0].id) //map grocery ids to array
+        console.log(ingredientid)    
+
+        const deletesql = `DELETE FROM UserIngredients WHERE user_id = ? AND ingredient_id = ?`
+        const removeQuery = ingredientid.map(id =>{
+            return pool.query(deletesql, [user_id, id])
+        })
+
+        await Promise.all(removeQuery)
+
+        res.status(200).json({ message: "Grocerie removed" });
+
+    }
+    catch(err){
+        console.error('Error deleting recipe:', err);
+        res.status(500).json({ error: "Recipe Deletion Failed" });
+    }
+
+    /* TEMPLATE
+    {
+        "ingredients": ["Eggs", "Butter"]
+      } */
+      
+
+});
 
 
 
@@ -353,9 +421,3 @@ app.listen(5000, ()=> {
     console.log('server is running port 5000')
 })
 
-
-
-
-
-
-//RIGHT NOW USERS WITH NO GROCERIES COME WITH DATABASE QUERY FAIL
