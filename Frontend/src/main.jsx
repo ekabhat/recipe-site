@@ -9,11 +9,11 @@ import './index.css'
 import App from './App.jsx'
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <ChakraProvider>
-      </BrowserRouter>
+  <React.StrictMode>
+    <ChakraProvider>  {/* ✅ Corrected case */}
+      <BrowserRouter>  {/* ✅ Corrected nesting */}
         <App />
       </BrowserRouter>
     </ChakraProvider>
-  </StrictMode>,
+  </React.StrictMode>
 )
