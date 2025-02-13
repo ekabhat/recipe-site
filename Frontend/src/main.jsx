@@ -10,8 +10,8 @@ import App from './App.jsx'
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <ChakraProvider>  {/* ✅ Corrected case */}
-      <BrowserRouter>  {/* ✅ Corrected nesting */}
+    <ChakraProvider> 
+      <BrowserRouter> 
         <App />
       </BrowserRouter>
     </ChakraProvider>
